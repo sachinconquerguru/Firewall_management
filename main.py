@@ -24,11 +24,11 @@ def fw_activate():
 	gprint("Activating the firewall")
 	os.popen("sudo systemctl start firewalld").read()
 
-def display_fw_details():
-    gprint("display after ")
-    reld = os.popen("sudo firewall-cmd --reload")
-    list_all = os.popen("sudo firewall-cmd --list-all --zone=home").read()
-    print(list_all)
+def display_fw_details(zone):
+	gprint("display after ")
+	reld = os.popen("sudo firewall-cmd --reload")
+	cmd_lst = "sudo firewall-cmd --list-all --zone="+zone+" --permanent" 
+	print(os.popen("sudo firewall-cmd --list-all --zone="+zone+" --permanent").read())
 
 def fw_get_status():
 	state = os.popen("sudo firewall-cmd --state").read()
@@ -50,6 +50,7 @@ def fw_add_port():
 	zone =  Prompt.ask("Enter zone :", choices=get_zone_list(),default=CONF["ZONE"])
 	cmd = "sudo firewall-cmd --add-port="+port+"/"+proto+" --zone="+zone+" --permanent "
 	print(os.popen(cmd).read())
+	display_fw_details(zone)
 
 def fw_get_services():
 	gprint("_________________________________________________________")
@@ -66,6 +67,7 @@ def fw_add_services():
 	zone = Prompt.ask("Enter the zone",choices=get_zone_list(),default=CONF["ZONE"])
 	cmd = "sudo firewall-cmd --add-service="+service+" --zone="+zone+" --permanent"
 	print(os.popen(cmd).read())
+	display_fw_details(zone)
 
 def fw_add_sources():
 	port_no = Prompt.ask("Enter the port number")
@@ -74,6 +76,7 @@ def fw_add_sources():
 	zone = Prompt.ask("Enter the zone :",choices = get_zone_list(), default=CONF["ZONE"])
 	cmd = "sudo firewall-cmd --add-source-port="+port_no+"/"+proto+" --zone="+zone+" --permanent"
 	print(os.popen(cmd).read())
+	display_fw_details(zone)
 
 def fw_add_rule_menu():
 	gprint("\t[1]Add Port")
@@ -88,6 +91,7 @@ def fw_delete_port():
 	zone = Prompt.ask("Enter the zone :",choices = get_zone_list(), default=CONF["ZONE"])
 	cmd = "sudo firewall-cmd --remove-port="+port_no+"/"+proto+" --zone="+zone+" --permanent"
 	print(os.popen(cmd).read())
+	display_fw_details(zone)
 
 def fw_delete_services():
 	fw_get_services()
@@ -96,6 +100,7 @@ def fw_delete_services():
 	zone = Prompt.ask("Enter the zone",choices=get_zone_list(),default=CONF["ZONE"])
 	cmd = "sudo firewall-cmd --remove-service="+service+" --zone="+zone+" --permanent"
 	print(os.popen(cmd).read())
+	display_fw_details(zone)
 
 def fw_delete_sources():
 	port_no = Prompt.ask("Enter the port number")
@@ -104,6 +109,7 @@ def fw_delete_sources():
 	zone = Prompt.ask("Enter the zone :",choices = get_zone_list(), default=CONF["ZONE"])
 	cmd = "sudo firewall-cmd --remove-source-port="+port_no+"/"+proto+" --zone="+zone+" --permanent"
 	print(os.popen(cmd).read())
+	display_fw_details(zone)
 
 def fw_add_rule():
     fw_add_rule_menu()
@@ -111,15 +117,12 @@ def fw_add_rule():
     if ch == "1":
         #add port
         fw_add_port()
-        display_fw_details()
     elif ch == "2":
         fw_add_services()
-        display_fw_details()
 		#add services
     elif ch == "3":
 		#add sources
         fw_add_sources()
-        display_fw_details()
     elif ch == "4":
         main_menu()
     else:
@@ -136,13 +139,10 @@ def fw_delete_rules():
     ch = Prompt.ask("Enter your choice :",choices=["1","2","3","4"])
     if ch == "1":
         fw_delete_port()
-        display_fw_details()
     elif ch == "2":
         fw_delete_services()
-        display_fw_details()
     elif ch == "3":
         fw_delete_sources()
-        display_fw_details()
     elif ch == "4":
         main_menu()
     else:
